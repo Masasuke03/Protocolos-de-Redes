@@ -72,11 +72,11 @@ Dependências por protocolo:
 
 ## Documentação
 
-📄 **Relatório do trabalho:** [COLE_AQUI_O_LINK_DO_GOOGLE_DOCS](https://docs.google.com/document/d/15CiDHxdGoMlZoRX6hDYCkoGJ8J83lRQCAU1RyxG8nVQ/edit?usp=sharing)
+📄 **Relatório do trabalho:** [Docs](https://docs.google.com/document/d/15CiDHxdGoMlZoRX6hDYCkoGJ8J83lRQCAU1RyxG8nVQ/edit?usp=sharing)
 
 ---
 
 ## Autores
 
 **Elison Maiko** - [@elison-maiko](https://github.com/elison-maiko)
-**Mashima** - [@elison-maiko](https://github.com/elison-maiko)
+**Mashima** - 
