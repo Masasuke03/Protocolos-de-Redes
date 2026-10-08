@@ -1,30 +1,41 @@
 ##  Visão Geral da Arquitetura
 
-Neste modelo, o Orquestrador comunica diretamente com cada Worker através de conexões TCP dedicadas (P2P), sem intermediários.
+Neste modelo, a comunicação ocorre através de ligações TCP persistentes de fluxo contínuo.
 
-* **Orquestrador:** Atua como **Cliente TCP**, abrindo conexões diretas para o IP e porta de cada Worker e enviando as tarefas em paralelo.
-* **Workers:** Atuam como **Servidores TCP**, escutando em portas locais dedicadas (`5001`, `5002`), processando as requisições e devolvendo as respostas na mesma sessão de socket.
+* **Orquestrador:** Atua como **Servidor TCP**, mantendo-se à escuta na porta 65432 e aguardando a ligação dos trabalhadores. 
+* **Workers:** Atuam como **Clientes TCP**, estabelecendo a ligação ativa diretamente para o IP do Orquestrador (127.0.0.1).
+* **Payload:** Objetos JSON serializados, codificados em UTF-8 e separados pelo delimitador de quebra de linha (\n).
 
 ---
 
-## Modos de Execução
+## Pré-requisitos e Instalação
 
-### 1. Socket TCP Puro (Texto Claro - Porta 1883 / Portas locais)
-* **Comunicação:** Transmissão direta de fluxos de bytes (`bytes stream`) sobre o protocolo TCP.
-* **Payload:** Objetos JSON serializados e codificados em `utf-8`.
+É necessário ter o Python 3.x instalado.
 
+A aplicação utiliza exclusivamente bibliotecas nativas do Python (socket, ssl, json, threading), não sendo necessária a instalação de pacotes externos.
+
+---
+
+## Geração de Certificados de Segurança (TLS)
+
+Antes de iniciar a execução, é estritamente necessário gerar os certificados de segurança locais. 
+Na raiz do diretório do projeto, execute o seguinte comando no terminal para criar as chaves:
+
+```
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes
+```
+
+---
 ### Executando
-* **Em terminais diferentes execute:**
+Todos os testes estão configurados para correr no ambiente local (localhost - 127.0.0.1). 
+**Abra 3 terminais distintos e execute:**
+
+1. No primeiro terminal, inicie o Orquestrador:
 ```
 python orquestrador_socket.py
+```
 
+2. Nos outros dois terminais, inicie os Trabalhadores para formar o consenso e dar a largada:
+```
 python trabalhador_socket.py
 ```
-
-
-### 2. Socket TCP Cifrado
-* **Em terminais diferentes execute:**
-```
-python SSL_orquestrador_socket.py
-
-python SSL_trabalhador_socket.py
