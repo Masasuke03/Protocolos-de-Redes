@@ -1,18 +1,17 @@
-## Visão Geral da Arquitetura
+##  Visão Geral da Arquitetura
 
-Neste modelo, o Orquestrador e os Workers se comunicam por **WebSockets**, em uma "corrida" de cálculo.
+Neste modelo, a comunicação ocorre através de ligações TCP persistentes assíncronas.
 
-* **Orquestrador:** Atua como **Servidor WebSocket** (porta `8765`). Espera todos os Workers conectarem, envia o mesmo desafio a todos ao mesmo tempo e mede o tempo de resposta de cada um.
-* **Workers:** Atuam como **Clientes WebSocket**, resolvem o desafio e respondem na mesma conexão.
-
-O vencedor é o Worker mais rápido entre os que acertaram (resposta mais comum) e recebe `50` Pfitscher Coins.
-
+* **Orquestrador:** Atua como **Servidor WS**, mantendo-se à escuta na porta 8765 e aguardando a ligação dos trabalhadores. 
+* **Workers:** Atuam como **Clientes WS**, estabelecendo a ligação ativa e o Handshake HTTP diretamente para o IP do Orquestrador (127.0.0.1).
+* **Payload:** Objetos JSON serializados e codificados em UTF-8.
+  
 ---
 
-## Requisitos
+## Pré-requisitos e Instalação
 
-* Python 3.8+
-* OpenSSL (apenas para o modo cifrado)
+É necessário ter o Python 3.x instalado.
+Ao contrário do Socket, o WebSocket não é nativo do Python. É obrigatória a instalação da biblioteca assíncrona correspondente:
 
 ```
 pip install websockets
@@ -20,48 +19,26 @@ pip install websockets
 
 ---
 
-## Modos de Execução
+## Geração de Certificados de Segurança (WSS)
 
-### 1. WebSocket Puro (WS - Texto Claro)
+Antes de iniciar a execução da comunicação cifrada, é estritamente necessário gerar os certificados de segurança locais. 
+Na raiz do diretório do projeto, execute o seguinte comando no terminal para criar as chaves:
 
-Em terminais diferentes, **nesta ordem**:
 ```
-python orquestrador_Websocket.py
-
-python trabalhador_websockets.py
-
-python trabalhador_websockets.py
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes
 ```
-
-### 2. WebSocket Cifrado (WSS - TLS)
-
-Gere o certificado autoassinado (necessário apenas uma vez):
-```
-openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 365 -subj "/CN=localhost"
-```
-
-Em terminais diferentes, **nesta ordem**:
-```
-python SSL_orquestrador_websocket.py
-
-python SSL_trabalhador_websocket.py
-
-python SSL_trabalhador_websocket.py
-```
-
-> O Worker SSL desativa a verificação do certificado para aceitar o autoassinado. Use apenas para testes.
 
 ---
+### Executando
+Todos os testes estão configurados para correr no ambiente local (localhost - 127.0.0.1). 
+**Abra 3 terminais distintos e execute:**
 
-## Configurações
+1. No primeiro terminal, inicie o Orquestrador:
+```
+python orquestrador_websocket.py
+```
 
-* `TOTAL_TRABALHADORES` (Orquestrador): quantidade de Workers esperados (padrão `2`).
-* `uri` (Worker): endereço do Orquestrador (padrão `127.0.0.1`). Em máquinas diferentes, troque pelo IP do Orquestrador e libere a porta `8765` no firewall.
-
----
-
-## Problemas Comuns
-
-* **`ModuleNotFoundError: websockets`** - rode `pip install websockets`.
-* **`FileNotFoundError` no modo SSL** - `cert.pem` e `key.pem` precisam estar na pasta de execução.
-* **Largada não acontece** - o número de Workers conectados deve ser igual a `TOTAL_TRABALHADORES`.
+2. Nos outros dois terminais, inicie os Trabalhadores para formar o consenso e dar a largada:
+```
+python trabalhador_websocket.py
+```
