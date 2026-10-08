@@ -79,4 +79,5 @@ Dependências por protocolo:
 ## Autores
 
 **Elison Maiko** - [@elison-maiko](https://github.com/elison-maiko)
-**Mashima** - 
+
+**Mashima** - [@Masasuke03](https://github.com/Masasuke03)
